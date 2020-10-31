@@ -29,7 +29,11 @@ import java.io.PushbackInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-
+import java.awt.Color;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Document;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
 public class AppGUI extends javax.swing.JFrame {
 
     /**
@@ -43,6 +47,41 @@ public class AppGUI extends javax.swing.JFrame {
     public AppGUI() {
         initComponents();
         //click();
+    }
+    
+    class HighlightColor extends DefaultHighlighter.DefaultHighlightPainter {
+        public HighlightColor(Color color){
+            super (color);
+        }
+    }
+    
+    Highlighter.HighlightPainter highlightcolor = new HighlightColor (Color.yellow);
+    
+    public void removeHighlight(JTextComponent textComp){
+        Highlighter h = textComp.getHighlighter();
+        Highlighter.Highlight[] hilite = h.getHighlights();  
+        for(int i=0; i<hilite.length; i++){
+            if (hilite[i].getPainter() instanceof HighlightColor) {
+                h.removeHighlight(hilite[i]);
+            }
+        }
+    }
+    
+    public void Highlight(JTextComponent textComp, String pattern){
+        
+        removeHighlight(textComp);
+        
+        try {
+            Highlighter h = textComp.getHighlighter();
+            Document doc = textComp.getDocument();
+            String text  = doc.getText(0,doc.getLength());
+            int position = 0;
+                while ((position = text.toUpperCase().indexOf(pattern.toUpperCase(),position))>=0) {
+                    h.addHighlight(position, position+pattern.length(), highlightcolor);
+                    position += pattern.length();
+                }
+        } catch (Exception e) {
+        }
     }
     /*
     private void click(){
@@ -86,6 +125,8 @@ public class AppGUI extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         btnClear = new javax.swing.JButton();
+        SearchText = new javax.swing.JTextField();
+        Search = new javax.swing.JButton();
 
         copy.setText("copy");
         copy.addActionListener(new java.awt.event.ActionListener() {
@@ -204,6 +245,13 @@ public class AppGUI extends javax.swing.JFrame {
             }
         });
 
+        Search.setText("Search");
+        Search.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SearchActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -214,7 +262,7 @@ public class AppGUI extends javax.swing.JFrame {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
+                        .addGap(19, 19, 19)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -224,7 +272,7 @@ public class AppGUI extends javax.swing.JFrame {
                                         .addComponent(Green)
                                         .addComponent(Blue))
                                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 117, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 120, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                         .addComponent(btnClear)
@@ -237,12 +285,16 @@ public class AppGUI extends javax.swing.JFrame {
                                         .addComponent(rdUnderline)
                                         .addComponent(rdBold))))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGap(5, 5, 5)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(jLabel3)
                                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 474, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 474, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel4))
+                                    .addComponent(jLabel4)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(Search)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(SearchText)))
                                 .addGap(0, 22, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
@@ -251,7 +303,11 @@ public class AppGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addGap(17, 17, 17)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(SearchText, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Search))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -417,6 +473,10 @@ fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
         jTextArea1.setFont(new Font("serif",Font.PLAIN, 14).deriveFont(fontAttributes));
     }//GEN-LAST:event_rdUnderlineActionPerformed
 
+    private void SearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchActionPerformed
+        Highlight(jTextArea1, SearchText.getText());
+    }//GEN-LAST:event_SearchActionPerformed
+
     
     /**
      * @param args the command line arguments
@@ -457,6 +517,8 @@ fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
     private javax.swing.JRadioButton Blue;
     private javax.swing.JRadioButton Green;
     private javax.swing.JRadioButton Red;
+    private javax.swing.JButton Search;
+    private javax.swing.JTextField SearchText;
     private javax.swing.JButton btnClear;
     private javax.swing.ButtonGroup buttonGroup;
     private javax.swing.JMenuItem copy;
